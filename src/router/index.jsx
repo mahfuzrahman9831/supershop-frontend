@@ -1,9 +1,17 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout          from '../components/layout/AppLayout'
 import ProtectedRoute     from './ProtectedRoute'
+
+// Auth
 import LoginPage          from '../pages/auth/LoginPage'
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
+
+// Dashboard
 import DashboardPage      from '../pages/DashboardPage'
+
+// POS (AppLayout ছাড়া — full screen)
+import PosPage            from '../pages/pos/PosPage'
+import SaleReturnPage     from '../pages/pos/SaleReturnPage'
 
 // 16A
 import BrandsPage         from '../pages/brands/BrandsPage'
@@ -26,9 +34,17 @@ import PurchaseListPage   from '../pages/purchases/PurchaseListPage'
 import PurchaseCreatePage from '../pages/purchases/PurchaseCreatePage'
 
 const router = createBrowserRouter([
+  // ── Public ──────────────────────────────────────────────────
   { path: '/login',           element: <LoginPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
 
+  // ── POS (full screen, no sidebar) ───────────────────────────
+  {
+    path: '/pos',
+    element: <ProtectedRoute><PosPage /></ProtectedRoute>,
+  },
+
+  // ── Protected with AppLayout ─────────────────────────────────
   {
     path: '/',
     element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
@@ -58,7 +74,8 @@ const router = createBrowserRouter([
       { path: 'purchases',          element: <PurchaseListPage /> },
       { path: 'purchases/new',      element: <PurchaseCreatePage /> },
 
-      // Phase 17+ এ আসবে
+      // Sale Return (AppLayout এর ভেতরে)
+      { path: 'sale-returns',       element: <SaleReturnPage /> },
     ],
   },
 

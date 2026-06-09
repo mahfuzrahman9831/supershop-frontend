@@ -77,3 +77,25 @@
     @apply animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full;
   }
 }
+
+
+/* ── POS Thermal Receipt Print (80mm) ─────────────────────── */
+@media print {
+  body * { visibility: hidden !important; }
+
+  #pos-receipt,
+  #pos-receipt * { visibility: visible !important; }
+
+  #pos-receipt {
+    position: fixed !important;
+    top:  0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    padding: 3mm !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+}
