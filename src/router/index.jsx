@@ -1,50 +1,64 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout          from '../components/layout/AppLayout'
 import ProtectedRoute     from './ProtectedRoute'
-
-// Auth
 import LoginPage          from '../pages/auth/LoginPage'
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
-
-// Dashboard
 import DashboardPage      from '../pages/DashboardPage'
 
-// Phase 16A — Catalog
+// 16A
 import BrandsPage         from '../pages/brands/BrandsPage'
 import CategoriesPage     from '../pages/categories/CategoriesPage'
 import UnitsPage          from '../pages/units/UnitsPage'
 import SuppliersPage      from '../pages/suppliers/SuppliersPage'
 import WarehousesPage     from '../pages/warehouses/WarehousesPage'
 
-// Phase 16B/C — আসছে
-// import ProductsPage    from '../pages/products/ProductsPage'
-// import StockPage       from '../pages/inventory/StockOverviewPage'
-// import PurchasesPage   from '../pages/purchases/PurchaseListPage'
+// 16B
+import ProductsPage       from '../pages/products/ProductsPage'
+import ProductFormPage    from '../pages/products/ProductFormPage'
+import ProductDetailPage  from '../pages/products/ProductDetailPage'
+
+// 16C
+import StockOverviewPage  from '../pages/inventory/StockOverviewPage'
+import OpeningStockPage   from '../pages/inventory/OpeningStockPage'
+import StockAdjustPage    from '../pages/inventory/StockAdjustPage'
+import StockMovementsPage from '../pages/inventory/StockMovementsPage'
+import PurchaseListPage   from '../pages/purchases/PurchaseListPage'
+import PurchaseCreatePage from '../pages/purchases/PurchaseCreatePage'
 
 const router = createBrowserRouter([
-  // ── Public ──────────────────────────────────────────────────
   { path: '/login',           element: <LoginPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
 
-  // ── Protected ────────────────────────────────────────────────
   {
     path: '/',
-    element: (
-      <ProtectedRoute>
-        <AppLayout />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
     children: [
-      { index: true,              element: <DashboardPage /> },
+      { index: true,                element: <DashboardPage /> },
 
       // Catalog
-      { path: 'brands',           element: <BrandsPage /> },
-      { path: 'categories',       element: <CategoriesPage /> },
-      { path: 'units',            element: <UnitsPage /> },
-      { path: 'suppliers',        element: <SuppliersPage /> },
-      { path: 'warehouses',       element: <WarehousesPage /> },
+      { path: 'brands',             element: <BrandsPage /> },
+      { path: 'categories',         element: <CategoriesPage /> },
+      { path: 'units',              element: <UnitsPage /> },
+      { path: 'suppliers',          element: <SuppliersPage /> },
+      { path: 'warehouses',         element: <WarehousesPage /> },
 
-      // Phase 16B/C এ যোগ হবে
+      // Products
+      { path: 'products',           element: <ProductsPage /> },
+      { path: 'products/new',       element: <ProductFormPage /> },
+      { path: 'products/:id',       element: <ProductDetailPage /> },
+      { path: 'products/:id/edit',  element: <ProductFormPage /> },
+
+      // Inventory
+      { path: 'stock',              element: <StockOverviewPage /> },
+      { path: 'stock/opening',      element: <OpeningStockPage /> },
+      { path: 'stock/adjust',       element: <StockAdjustPage /> },
+      { path: 'stock/movements',    element: <StockMovementsPage /> },
+
+      // Purchase
+      { path: 'purchases',          element: <PurchaseListPage /> },
+      { path: 'purchases/new',      element: <PurchaseCreatePage /> },
+
+      // Phase 17+ এ আসবে
     ],
   },
 
