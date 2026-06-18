@@ -132,7 +132,7 @@ const SearchPanel = ({ disabled }) => {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="font-bold text-gray-900 text-sm">
-                      ৳ {Number(p.sale_price ?? 0).toLocaleString()}
+                      ৳ {Number(p.default_selling_price ?? 0).toLocaleString()}
                     </p>
                     <p className={`text-[10px] font-medium ${
                       isOut ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-emerald-600'

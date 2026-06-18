@@ -89,10 +89,8 @@ const StockAdjustPage = () => {
       await api.post('/stock/adjust', {
         product_id:   form.product_id,
         warehouse_id: form.warehouse_id,
-        type:         form.type,
-        quantity:     Number(form.quantity),
-        reason:       form.reason,
-        notes:        form.notes || undefined,
+        new_quantity: Number(form.quantity),
+        note:         form.reason + (form.notes ? ` — ${form.notes}` : ''),
       })
       toast.success('Stock adjustment সফল হয়েছে ✓')
       setForm(p => ({ ...p, product: null, product_id: '', quantity: '', notes: '' }))

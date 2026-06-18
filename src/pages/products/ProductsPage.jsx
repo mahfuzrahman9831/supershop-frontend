@@ -171,10 +171,10 @@ const ProductsPage = () => {
                     </td>
                     <td className="text-sm text-gray-600">{p.category?.name ?? '—'}</td>
                     <td className="text-right text-sm text-gray-600">
-                      {p.cost_price ? `৳ ${Number(p.cost_price).toLocaleString()}` : '—'}
+                      {p.last_purchase_price ? `৳ ${Number(p.last_purchase_price).toLocaleString()}` : '—'}
                     </td>
                     <td className="text-right font-semibold text-gray-900">
-                      ৳ {Number(p.sale_price ?? 0).toLocaleString()}
+                      ৳ {Number(p.default_selling_price ?? 0).toLocaleString()}
                     </td>
                     <td className="text-right">
                       <span className={`font-semibold text-sm ${isLow ? 'text-red-600' : 'text-gray-700'}`}>

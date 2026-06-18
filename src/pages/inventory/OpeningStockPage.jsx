@@ -78,11 +78,11 @@ const OpeningStockPage = () => {
     for (const row of valid) {
       try {
         await api.post('/stock/opening', {
-          product_id:   row.product_id,
-          warehouse_id: row.warehouse_id,
-          quantity:     Number(row.quantity),
-          cost_price:   row.cost_price !== '' ? Number(row.cost_price) : undefined,
-          notes:        row.notes || undefined,
+          product_id:     row.product_id,
+          warehouse_id:   row.warehouse_id,
+          quantity:       Number(row.quantity),
+          purchase_price: row.cost_price !== '' ? Number(row.cost_price) : 0,
+          note:           row.notes || undefined,
         })
         success++
       } catch (err) {

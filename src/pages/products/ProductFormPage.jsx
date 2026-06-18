@@ -15,9 +15,9 @@ const SELECT_ENDPOINTS = [
 const INIT = {
   name: '', barcode: '', sku: '', description: '',
   category_id: '', brand_id: '', unit_id: '', tax_rate_id: '',
-  cost_price: '', sale_price: '',
-  min_stock: '0', type: 'simple',
-  is_active: true, has_batch: false, has_expiry: false,
+  last_purchase_price: '', default_selling_price: '',
+  low_stock_alert: '0', costing_method: 'fifo',
+  is_active: true, has_batch: false, has_serial: false,
 }
 
 const genBarcode = () => Date.now().toString().slice(-10)
@@ -77,8 +77,8 @@ const ProductFormPage = () => {
   }
 
   // ── Markup calculation ────────────────────────────────────
-  const cost = Number(form.cost_price)
-  const sale = Number(form.sale_price)
+  const cost = Number(form.last_purchase_price)
+  const sale = Number(form.default_selling_price)
   const markup = cost > 0 && sale > 0
     ? ((sale - cost) / cost * 100).toFixed(1) : null
   const profitAmt = cost > 0 && sale > 0 ? (sale - cost).toFixed(2) : null
@@ -89,17 +89,22 @@ const ProductFormPage = () => {
     setSaving(true)
     try {
       const payload = {
-        ...form,
-        cost_price:  form.cost_price  !== '' ? Number(form.cost_price)  : undefined,
-        sale_price:  form.sale_price  !== '' ? Number(form.sale_price)  : undefined,
-        min_stock:   Number(form.min_stock),
-        category_id: form.category_id || undefined,
-        brand_id:    form.brand_id    || undefined,
-        unit_id:     form.unit_id     || undefined,
-        tax_rate_id: form.tax_rate_id || undefined,
-        barcode:     form.barcode     || undefined,
-        sku:         form.sku         || undefined,
-      }
+      name:                  form.name,
+      barcode:               form.barcode     || undefined,
+      sku:                   form.sku         || undefined,
+      description:           form.description || undefined,
+      category_id:           form.category_id || undefined,
+      brand_id:              form.brand_id    || undefined,
+      unit_id:               form.unit_id     || undefined,
+      tax_rate_id:           form.tax_rate_id || undefined,
+      last_purchase_price:   form.last_purchase_price   !== '' ? Number(form.last_purchase_price)   : undefined,
+      default_selling_price: form.default_selling_price !== '' ? Number(form.default_selling_price) : undefined,
+      low_stock_alert:       Number(form.low_stock_alert ?? 0),
+      costing_method:        form.costing_method || 'fifo',
+      is_active:             form.is_active,
+      has_batch:             form.has_batch,
+      has_serial:            form.has_serial,
+}
 
       isEdit
         ? await api.put(`/products/${id}`, payload)
@@ -237,15 +242,29 @@ const ProductFormPage = () => {
             {/* Pricing */}
             <Section title="Pricing">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Cost Price (Purchase Price)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">৳</span>
-                    <input name="cost_price" type="number" step="0.01" min="0"
-                      value={form.cost_price} onChange={onChange}
-                      placeholder="0.00" className="input pl-7" />
-                  </div>
+               {/* Cost Price */}
+<div>
+  <label className="label">Last Purchase Price</label>
+  <div className="relative">
+    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">৳</span>
+    <input name="last_purchase_price" type="number" step="0.01" min="0"
+      value={form.last_purchase_price} onChange={onChange}
+      placeholder="0.00" className="input pl-7" />
+  </div>
+</div>
+
+{/* Sale Price */}
+<div>
+  <label className="label">Default Selling Price <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">৳</span>
+                  <input name="default_selling_price" type="number" step="0.01" min="0"
+                    value={form.default_selling_price} onChange={onChange}
+                    placeholder="0.00"
+                    className={`input pl-7 ${errors.default_selling_price ? 'input-error' : ''}`} />
                 </div>
+                {errors.default_selling_price && <p className="form-error">{errors.default_selling_price}</p>}
+              </div>
                 <div>
                   <label className="label">Sale Price <span className="text-red-500">*</span></label>
                   <div className="relative">
@@ -287,19 +306,19 @@ const ProductFormPage = () => {
             <Section title="Stock Settings">
               <div className="space-y-4">
                 <div>
-                  <label className="label">Minimum Stock (Alert Level)</label>
-                  <input name="min_stock" type="number" min="0"
-                    value={form.min_stock} onChange={onChange} className="input" />
+                  <label className="label">Low Stock Alert Level</label>
+                  <input name="low_stock_alert" type="number" min="0"
+                    value={form.low_stock_alert} onChange={onChange} className="input" />
                   <p className="text-xs text-gray-400 mt-1">
                     Stock এর কম হলে Dashboard এ alert আসবে
                   </p>
                 </div>
                 <div>
-                  <label className="label">Product Type</label>
-                  <select name="type" value={form.type} onChange={onChange} className="input">
-                    <option value="simple">Simple (সাধারণ product)</option>
-                    <option value="variant">Variant (size/color আছে)</option>
-                    <option value="bundle">Bundle (combo/set)</option>
+                  <label className="label">Costing Method</label>
+                  <select name="costing_method" value={form.costing_method} onChange={onChange} className="input">
+                    <option value="fifo">FIFO (First In First Out)</option>
+                    <option value="lifo">LIFO (Last In First Out)</option>
+                    <option value="avg">Average Cost</option>
                   </select>
                 </div>
               </div>
@@ -309,9 +328,9 @@ const ProductFormPage = () => {
             <Section title="Options">
               <div className="space-y-4">
                 {[
-                  { name: 'is_active', label: 'Active', sub: 'POS এ দেখাবে এবং বিক্রি করা যাবে' },
-                  { name: 'has_batch', label: 'Batch Tracking', sub: 'Purchase এ batch number রাখবে' },
-                  { name: 'has_expiry', label: 'Expiry Date Tracking', sub: 'Expiry date monitor করবে' },
+                  { name: 'is_active',  label: 'Active',          sub: 'POS এ দেখাবে এবং বিক্রি করা যাবে'  },
+                  { name: 'has_batch',  label: 'Batch Tracking',  sub: 'Purchase এ batch number রাখবে'       },
+                  { name: 'has_serial', label: 'Serial Tracking', sub: 'প্রতিটি item এর serial number রাখবে' },
                 ].map(opt => (
                   <label key={opt.name} className="flex items-start gap-3 cursor-pointer group">
                     <input type="checkbox" name={opt.name}

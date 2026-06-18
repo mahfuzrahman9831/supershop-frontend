@@ -131,18 +131,15 @@ const PurchaseCreatePage = () => {
         reference:     form.reference || undefined,
         notes:         form.notes     || undefined,
         items: items.map(i => ({
-          product_id:    i.product_id,
-          quantity:      Number(i.quantity),
-          cost_price:    Number(i.cost_price),
-          discount:      Number(i.discount_pct) || 0,
-        })),
-        payments: payments
-          .filter(p => p.payment_method_id && Number(p.amount) > 0)
-          .map(p => ({
-            payment_method_id: Number(p.payment_method_id),
-            amount:            Number(p.amount),
-          })),
-      })
+        product_id:     i.product_id,
+        quantity:       Number(i.quantity),
+        purchase_price: Number(i.cost_price),
+        discount:       Number(i.discount_pct) || 0,
+      })),
+        paid_amount:       totalPaid > 0 ? totalPaid : undefined,
+        payment_method_id: payments.find(p => p.method_id && Number(p.amount) > 0)
+                            ? Number(payments.find(p => p.method_id)?.method_id) : undefined,
+              })
       toast.success('Purchase সফলভাবে তৈরি হয়েছে ✓')
       navigate('/purchases')
     } catch (err) {

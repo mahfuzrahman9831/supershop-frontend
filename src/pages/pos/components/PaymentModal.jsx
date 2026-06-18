@@ -59,21 +59,23 @@ const PaymentModal = ({ open, onClose, total, onSuccess }) => {
     setSaving(true)
     try {
       const { data } = await api.post('/sales', {
-        customer_id:  customer?.id ?? null,
-        warehouse_id: Number(warehouseId),
-        sale_date:    new Date().toISOString().slice(0, 10),
-        discount:     Number(discount) || 0,
-        items: items.map(i => ({
-          product_id: i.product_id,
-          quantity:   Number(i.quantity),
-          unit_price: Number(i.unit_price),
-          discount:   Number(i.discount_pct) || 0,
-        })),
-        payments: valid.map(p => ({
-          payment_method_id: Number(p.method_id),
-          amount:            Number(p.amount),
-        })),
-      })
+          customer_id:     customer?.id ?? null,
+          warehouse_id:    Number(warehouseId),
+          sale_date:       new Date().toISOString().slice(0, 10),
+          discount_amount: subtotalRaw * (Number(discount) / 100),
+          items: items.map(i => ({
+            product_id:      i.product_id,
+            quantity:        Number(i.quantity),
+            unit_price:      Number(i.unit_price),
+            cost_price:      Number(i.cost_price ?? 0),
+            discount_amount: Number(i.unit_price) * Number(i.quantity) * (Number(i.discount_pct ?? 0) / 100),
+            tax_amount:      0,
+          })),
+          payments: valid.map(p => ({
+            payment_method_id: Number(p.method_id),
+            amount:            Number(p.amount),
+          })),
+        })
 
       setLastSale(data?.data ?? null)
       clearCart()

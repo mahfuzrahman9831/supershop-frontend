@@ -32,7 +32,8 @@ const usePosStore = create(
             product_id:   product.id,
             product,
             quantity:     1,
-            unit_price:   Number(product.sale_price ?? 0),
+            unit_price:   Number(product.default_selling_price ?? 0),
+            cost_price:   Number(product.last_purchase_price ?? 0),
             discount_pct: 0,
           }]})
         }
