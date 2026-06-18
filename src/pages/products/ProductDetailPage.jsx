@@ -33,8 +33,8 @@ const ProductDetailPage = () => {
   )
   if (!product) return null
 
-  const stock     = product.stock ?? product.total_stock ?? 0
-  const isLow     = stock <= (product.min_stock ?? 5)
+  const stock = product.stock_quantity ?? product.stock ?? product.total_stock ?? 0
+  const isLow = stock <= (product.low_stock_alert ?? product.min_stock ?? 5)
   const cost      = Number(product.cost_price ?? 0)
   const sale      = Number(product.sale_price ?? 0)
   const profit    = cost > 0 ? sale - cost : null

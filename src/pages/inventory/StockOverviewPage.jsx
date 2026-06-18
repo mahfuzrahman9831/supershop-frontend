@@ -128,9 +128,9 @@ const StockOverviewPage = () => {
                 </td></tr>
               ) : items.map((item, i) => {
                 const product  = item.product ?? item
-                const qty      = Number(item.quantity_on_hand ?? item.stock ?? 0)
-                const cost     = Number(item.cost_price ?? product.cost_price ?? 0)
-                const minStock = Number(item.min_stock ?? product.min_stock ?? 5)
+                const qty      = Number(item.quantity_on_hand ?? item.stock_quantity ?? item.stock ?? 0)
+                const cost     = Number(item.cost_price ?? product.last_purchase_price ?? 0)
+                const minStock = Number(item.low_stock_alert ?? item.min_stock ?? product.low_stock_alert ?? 5)
                 const isLow    = qty <= minStock
 
                 return (

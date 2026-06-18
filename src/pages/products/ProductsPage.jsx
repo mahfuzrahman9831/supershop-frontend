@@ -150,8 +150,8 @@ const ProductsPage = () => {
                   <p className="text-sm">কোন product নেই — Add Product click করুন</p>
                 </td></tr>
               ) : products.map((p, i) => {
-                const stock = p.stock ?? p.total_stock ?? 0
-                const isLow = stock <= (p.min_stock ?? 5)
+                const stock = p.stock_quantity ?? p.stock ?? p.total_stock ?? 0
+                const isLow = stock <= (p.low_stock_alert ?? p.min_stock ?? 5)
                 return (
                   <tr key={p.id}>
                     <td className="text-gray-400 text-xs">{(page-1)*15+i+1}</td>

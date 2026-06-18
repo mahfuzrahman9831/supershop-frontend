@@ -34,7 +34,7 @@ const LowStockList = ({ products = [], loading }) => (
               <p className="text-xs text-gray-400">{p.sku ?? p.barcode ?? '—'}</p>
             </div>
             <span className="badge badge-danger ml-3 flex-shrink-0">
-              {p.stock ?? p.total_stock ?? 0} {p.unit?.name ?? 'pcs'}
+              {p.stock_quantity ?? p.stock ?? 0} {p.unit?.name ?? 'pcs'}
             </span>
           </div>
         ))
