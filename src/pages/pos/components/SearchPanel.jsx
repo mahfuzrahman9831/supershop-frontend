@@ -49,11 +49,11 @@ const SearchPanel = ({ disabled }) => {
   }, [query])
 
   const addToCart = (product) => {
-    const stock = product.stock ?? product.total_stock ?? 0
-    if (stock <= 0) {
-      toast.error(`${product.name}: Stock নেই!`, { duration: 1500 })
-      return
-    }
+  const stock = product.stock_quantity ?? product.stock ?? product.total_stock ?? 0
+  if (stock <= 0) {
+    toast.error(`${product.name}: Stock নেই!`, { duration: 1500 })
+    return
+  }
     addItem(product)
     setQuery('')
     setResults([])
@@ -105,9 +105,9 @@ const SearchPanel = ({ disabled }) => {
         ) : (
           <div>
             {results.map((p) => {
-              const stock = p.stock ?? p.total_stock ?? 0
-              const isOut = stock <= 0
-              const isLow = stock <= (p.min_stock ?? 5) && !isOut
+            const stock = p.stock_quantity ?? p.stock ?? p.total_stock ?? 0
+            const isOut = stock <= 0
+            const isLow = stock <= (p.low_stock_alert ?? p.min_stock ?? 5) && !isOut
               return (
                 <button
                   key={p.id}

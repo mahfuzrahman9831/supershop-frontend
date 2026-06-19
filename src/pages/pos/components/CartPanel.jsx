@@ -72,12 +72,13 @@ const CartPanel = ({ onPay, onHold, onCustomer }) => {
             <span>Discount</span>
             <div className="flex items-center gap-0.5">
               <input
-                type="number" min="0" max="100" step="0.5"
-                value={discount}
-                onChange={e => setDiscount(Number(e.target.value))}
-                data-modal="true"
-                className="w-12 text-center text-xs border border-gray-300 rounded-lg py-0.5 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
+                  type="number" min="0" max="100" step="0.5"
+                  value={discount || ''}
+                  onChange={e => setDiscount(e.target.value === '' ? 0 : Number(e.target.value))}
+                  onFocus={e => e.target.select()}
+                  data-modal="true"
+                  className="w-12 text-center text-xs border border-gray-300 rounded-lg py-0.5 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
               <span className="text-gray-400 text-xs">%</span>
             </div>
           </div>
