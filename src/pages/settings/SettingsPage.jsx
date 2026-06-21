@@ -24,13 +24,13 @@ const SettingsPage = () => {
   const onChange = ({target:{name,value}}) => setForm(p=>({...p,[name]:value}))
 
   const save = async () => {
-    setSaving(true)
-    try {
-      await api.put('/settings', form)
-      toast.success('Settings save হয়েছে ✓')
-    } catch(err){ toast.error(err.response?.data?.message??'Save হয়নি') }
-    finally { setSaving(false) }
-  }
+  setSaving(true)
+  try {
+    await api.put('/settings', { settings: form })
+    toast.success('Settings save হয়েছে ✓')
+  } catch(err){ toast.error(err.response?.data?.message??'Save হয়নি') }
+  finally { setSaving(false) }
+}
 
   const F = ({label, name, type='text', placeholder='', options=null, help=''}) => (
     <div>

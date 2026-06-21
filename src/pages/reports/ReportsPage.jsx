@@ -55,6 +55,20 @@ const ReportsPage = () => {
     else { const d=new Date(n); d.setDate(d.getDate()-days); setFrom(fmtD(d)); setTo(fmtD(n)) }
   }
 
+  const groupSalesByDate = (sales = []) => {
+  const map = {}
+  sales.forEach(s => {
+    const date = (s.created_at ?? s.sale_date ?? '').slice(0, 10)
+    if (!date) return
+    if (!map[date]) map[date] = { date, total: 0, subtotal: 0, discount: 0, count: 0 }
+    map[date].total    += Number(s.total_amount ?? 0)
+    map[date].subtotal += Number(s.subtotal ?? s.total_amount ?? 0)
+    map[date].discount += Number(s.discount ?? 0)
+    map[date].count    += 1
+  })
+  return Object.values(map).sort((a, b) => a.date.localeCompare(b.date))
+}
+
   const needsDate = ['sales','profit'].includes(tab)
 
   const renderContent = () => {
@@ -64,19 +78,23 @@ const ReportsPage = () => {
     // ── SALES ──────────────────────────────────────────────────────
     if(tab==='sales'){
       const sum   = data.summary??data
-      const daily = data.daily??data.data??[]
+      const daily = groupSalesByDate(data.sales ?? [])
       return (<div className="space-y-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            {label:"Total Sales",    value:sum.total_sales??sum.total_amount??0,   icon:ShoppingCart, color:'bg-blue-500'},
-            {label:"Total Orders",   value:sum.total_orders??sum.count??0,         icon:TrendingUp,   color:'bg-purple-500', noTk:true},
-            {label:"Total Paid",     value:sum.total_paid??0,                      icon:DollarSign,   color:'bg-emerald-500'},
-            {label:"Total Due",      value:sum.total_due??0,                       icon:AlertTriangle,color:'bg-amber-500'},
-          ].map(s=>(
+            { label: 'Sales Count',   value: sum.sales_count  ?? 0, icon: ShoppingCart,  color: 'bg-blue-500',    noTk: true },
+            { label: 'Total Revenue', value: sum.total_sales  ?? 0, icon: DollarSign,    color: 'bg-gray-700' },
+            { label: 'Total Profit',  value: sum.total_profit ?? 0, icon: TrendingUp,    color: 'bg-emerald-500' },
+            { label: 'Total Due',     value: sum.total_due    ?? 0, icon: AlertTriangle, color: sum.total_due > 0 ? 'bg-red-500' : 'bg-gray-300' },
+          ].map(s => (
             <div key={s.label} className="card card-body flex items-center gap-3">
-              <div className={`w-10 h-10 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}><s.icon size={18} className="text-white"/></div>
-              <div><p className="text-gray-500 text-xs">{s.label}</p>
-                <p className="text-xl font-bold text-gray-900">{!s.noTk&&'৳ '}{Number(s.value).toLocaleString()}</p></div>
+              <div className={`w-10 h-10 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                <s.icon size={18} className="text-white"/>
+              </div>
+              <div>
+                <p className="text-gray-500 text-xs">{s.label}</p>
+                <p className="text-xl font-bold text-gray-900">{!s.noTk&&'৳ '}{Number(s.value).toLocaleString()}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -138,27 +156,28 @@ const ReportsPage = () => {
 
     // ── STOCK VALUATION ────────────────────────────────────────────
     if(tab==='stock'){
-      const items  = Array.isArray(data)?data:(data?.data??data?.items??[])
-      const total  = items.reduce((s,i)=>s+Number(i.total_value??i.value??0),0)
+      const items = data?.products ?? []
+      const total = Number(data?.total_value ?? 0)
       return (<div className="space-y-4">
         <div className="card card-body"><p className="text-gray-500 text-sm">Total Stock Value</p>
           <p className="text-3xl font-bold text-brand-600 mt-1">৳ {total.toLocaleString()}</p></div>
         <div className="card">
           <div className="card-header">Stock Valuation ({items.length} products)</div>
           <div className="table-wrapper rounded-none border-x-0 border-b-0">
-            <table className="table"><thead><tr><th>#</th><th>Product</th><th>Category</th><th className="text-right">Qty</th><th className="text-right">Cost</th><th className="text-right">Value</th></tr></thead>
+            <table className="table"><thead><tr><th>#</th><th>Product</th><th>Category</th><th className="text-right">Qty</th><th className="text-right">Avg Cost</th><th className="text-right">Value</th></tr></thead>
               <tbody>{!items.length?(<tr><td colSpan={6} className="py-10 text-center text-gray-400 text-sm">Data নেই</td></tr>)
-                :items.map((item,i)=>(
-                  <tr key={i}>
+                :items.map((item,i)=>{
+                  const avgCost = item.quantity > 0 ? item.stock_value / item.quantity : 0
+                  return (
+                  <tr key={item.product_id??i}>
                     <td className="text-gray-400 text-xs">{i+1}</td>
-                    <td><p className="font-medium text-gray-800 text-sm">{item.product?.name??item.name}</p>
-                      {item.product?.barcode&&<p className="text-xs font-mono text-gray-400">{item.product.barcode}</p>}</td>
-                    <td className="text-sm text-gray-500">{item.product?.category?.name??item.category??'—'}</td>
-                    <td className="text-right font-medium text-gray-700">{Number(item.quantity??item.stock??0).toLocaleString()}</td>
-                    <td className="text-right text-gray-600 text-sm">৳ {Number(item.cost_price??item.unit_cost??0).toLocaleString()}</td>
-                    <td className="text-right font-bold text-gray-900">৳ {Number(item.total_value??item.value??0).toLocaleString()}</td>
+                    <td><p className="font-medium text-gray-800 text-sm">{item.product_name}</p></td>
+                    <td className="text-sm text-gray-500">{item.category??'—'}</td>
+                    <td className="text-right font-medium text-gray-700">{Number(item.quantity??0).toLocaleString()} {item.unit??''}</td>
+                    <td className="text-right text-gray-600 text-sm">৳ {avgCost.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
+                    <td className="text-right font-bold text-gray-900">৳ {Number(item.stock_value??0).toLocaleString()}</td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

@@ -69,7 +69,7 @@ const SalesListPage = () => {
                 const due=Number(s.due_amount??0)
                 return(<tr key={s.id}>
                   <td className="text-gray-400 text-xs">{(page-1)*15+i+1}</td>
-                  <td><button onClick={()=>navigate(`/sales/${s.id}`)} className="font-mono text-sm font-semibold text-brand-600 hover:underline">{s.invoice_number??`#${s.id}`}</button></td>
+                  <td><button onClick={()=>navigate(`/sales/${s.id}`)} className="font-mono text-sm font-semibold text-brand-600 hover:underline">{s.invoice_no??`#${s.id}`}</button></td>
                   <td className="text-sm text-gray-700">{s.customer?.name??'Walk-in'}</td>
                   <td className="text-sm text-gray-500">{fmtDate(s.sale_date??s.created_at)}</td>
                   <td className="text-right font-semibold text-gray-900">৳ {Number(s.total_amount??0).toLocaleString()}</td>
@@ -88,7 +88,7 @@ const SalesListPage = () => {
         <Pagination meta={meta} onPageChange={setPage}/>
       </div>
 
-      <Modal open={payModal} onClose={()=>setPayModal(false)} title={`Payment — ${payTarget?.invoice_number??''}`} size="sm">
+      <Modal open={payModal} onClose={()=>setPayModal(false)} title={`Payment — ${payTarget?.invoice_no??''}`} size="sm"></Modal><Modal open={payModal} onClose={()=>setPayModal(false)} title={`Payment — ${payTarget?.invoice_number??''}`} size="sm">
         <div className="space-y-4">
           <div className="p-3 bg-gray-50 rounded-lg text-sm space-y-1">
             <div className="flex justify-between"><span className="text-gray-500">Total</span><span className="font-bold">৳ {Number(payTarget?.total_amount??0).toLocaleString()}</span></div>

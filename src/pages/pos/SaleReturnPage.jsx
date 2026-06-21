@@ -64,11 +64,11 @@ const SaleReturnPage = () => {
         sale_id: sale.id,
         reason,
         items: items.map(i => ({
-          sale_item_id: i.id,
-          product_id:   i.product_id,
-          quantity:     i.return_qty,
-          unit_price:   Number(i.unit_price ?? i.sale_price ?? 0),
-        })),
+        sale_item_id: i.id,
+        product_id:   i.product_id,
+        quantity:     i.return_qty,
+        unit_price:   Number(i.selling_price ?? 0),
+      })),
       })
       toast.success('Sale return সফল হয়েছে ✓')
       navigate('/sales')
@@ -115,7 +115,7 @@ const SaleReturnPage = () => {
           <div className="card card-body mb-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-bold text-xl text-gray-900">{sale.invoice_number ?? `#${sale.id}`}</p>
+                <p className="font-bold text-xl text-gray-900">{sale.invoice_no}</p>
                 <p className="text-sm text-gray-500 mt-0.5">
                   {sale.customer?.name ?? 'Walk-in'} ·{' '}
                   {new Date(sale.sale_date ?? sale.created_at).toLocaleDateString('en-BD')}
@@ -145,8 +145,8 @@ const SaleReturnPage = () => {
                       {item.product?.name ?? item.name}
                     </p>
                     <p className="text-xs text-gray-400">
-                      Sold: {item.max_qty} pcs · ৳{Number(item.unit_price ?? 0).toLocaleString()} each
-                    </p>
+                                Sold: {item.max_qty} pcs · ৳{Number(item.selling_price ?? 0).toLocaleString()} each
+                              </p>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -167,7 +167,7 @@ const SaleReturnPage = () => {
                   <div className="w-20 text-right flex-shrink-0">
                     <p className={`text-sm font-bold ${item.return_qty > 0 ? 'text-red-600' : 'text-gray-300'}`}>
                       {item.return_qty > 0
-                        ? `৳ ${(item.return_qty * Number(item.unit_price ?? 0)).toLocaleString()}`
+                        ? `৳ ${(item.return_qty * Number(item.selling_price ?? 0)).toLocaleString()}`
                         : '—'
                       }
                     </p>

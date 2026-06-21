@@ -11,7 +11,7 @@ const LowStockList = ({ products = [], loading }) => (
           <span className="badge badge-danger ml-1">{products.length}</span>
         )}
       </span>
-      <Link to="/stock" className="text-xs text-brand-600 hover:underline flex items-center gap-1">
+      <Link to="/products" className="text-xs text-brand-600 hover:underline flex items-center gap-1">
         সব দেখুন <ArrowRight size={11} />
       </Link>
     </div>
@@ -34,7 +34,7 @@ const LowStockList = ({ products = [], loading }) => (
               <p className="text-xs text-gray-400">{p.sku ?? p.barcode ?? '—'}</p>
             </div>
             <span className="badge badge-danger ml-3 flex-shrink-0">
-              {p.stock_quantity ?? p.stock ?? 0} {p.unit?.name ?? 'pcs'}
+              {p.stock_quantity ?? 0} {p.unit?.short_name ?? p.unit?.name ?? 'pcs'}
             </span>
           </div>
         ))

@@ -10,6 +10,7 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import DashboardPage      from '../pages/DashboardPage'
 import PosPage            from '../pages/pos/PosPage'
 import SaleReturnPage     from '../pages/pos/SaleReturnPage'
+import SaleDetailPage from '../pages/sales/SaleDetailPage'
 
 // 16A — Catalog
 import BrandsPage         from '../pages/brands/BrandsPage'
@@ -84,6 +85,8 @@ const router = createBrowserRouter([
       // Sales
       { path: 'sales',              element: <SalesListPage /> },
       { path: 'sale-returns',       element: <SaleReturnPage /> },
+      { path: 'sales',              element: <SalesListPage /> },
+      { path: 'sales/:id',          element: <SaleDetailPage /> },
 
       // Reports
       { path: 'reports',            element: <ReportsPage /> },

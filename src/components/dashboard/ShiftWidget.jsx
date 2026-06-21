@@ -29,9 +29,9 @@ const ShiftWidget = ({ shift, loading }) => {
       {shift ? (
         <div className="space-y-2">
           {[
-            { label: 'Cashier',          value: shift.user?.name ?? '—', icon: <User size={12} /> },
-            { label: 'Opening Balance',  value: `৳ ${Number(shift.opening_balance ?? 0).toLocaleString()}` },
-            { label: 'Started',          value: fmt(shift.opened_at) },
+            { label: 'Cashier',         value: shift.user?.name ?? '—', icon: <User size={12} /> },
+            { label: 'Opening Balance', value: `৳ ${Number(shift.opening_cash ?? 0).toLocaleString()}` },
+            { label: 'Started',         value: fmt(shift.opened_at) },
           ].map(({ label, value, icon }) => (
             <div key={label} className="flex items-center justify-between text-sm">
               <span className="text-gray-500 flex items-center gap-1">{icon}{label}</span>

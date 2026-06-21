@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
-// Time ago (Bangla)
 const timeAgo = (str) => {
   if (!str) return '—'
   const mins = Math.floor((Date.now() - new Date(str)) / 60000)
@@ -13,12 +12,12 @@ const timeAgo = (str) => {
 }
 
 const statusClass = (status) => ({
-  completed: 'badge-success',
-  paid:      'badge-success',
-  partial:   'badge-warning',
-  due:       'badge-danger',
-  pending:   'badge-warning',
-  draft:     'badge-gray',
+  paid:    'badge-success',
+  partial: 'badge-warning',
+  unpaid:  'badge-danger',
+  due:     'badge-danger',
+  pending: 'badge-warning',
+  draft:   'badge-gray',
 }[status] ?? 'badge-gray')
 
 const RecentSalesTable = ({ sales = [], loading }) => (
@@ -51,14 +50,14 @@ const RecentSalesTable = ({ sales = [], loading }) => (
           ) : !sales.length ? (
             <tr>
               <td colSpan={5} className="text-center py-10 text-gray-400 text-sm">
-                আজকে কোন sale নেই
+                সাম্প্রতিক কোন sale নেই
               </td>
             </tr>
           ) : sales.map((s) => (
             <tr key={s.id}>
               <td>
                 <Link to={`/sales/${s.id}`} className="text-brand-600 hover:underline font-mono text-xs font-medium">
-                  {s.invoice_number ?? `#${s.id}`}
+                  {s.invoice_no ?? `#${s.id}`}
                 </Link>
               </td>
               <td className="text-gray-700 text-sm">{s.customer?.name ?? 'Walk-in'}</td>
@@ -66,7 +65,7 @@ const RecentSalesTable = ({ sales = [], loading }) => (
                 ৳ {Number(s.total_amount ?? 0).toLocaleString()}
               </td>
               <td>
-                <span className={`badge ${statusClass(s.status)}`}>{s.status}</span>
+                <span className={`badge ${statusClass(s.payment_status)}`}>{s.payment_status}</span>
               </td>
               <td className="text-right text-xs text-gray-400">{timeAgo(s.created_at)}</td>
             </tr>
