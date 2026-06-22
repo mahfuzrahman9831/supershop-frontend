@@ -9,12 +9,13 @@ const REASONS = ['Customer request', 'Wrong product', 'Damaged product', 'Qualit
 const SaleReturnPage = () => {
   const navigate = useNavigate()
 
-  const [invoice,     setInvoice]     = useState('')
-  const [sale,        setSale]        = useState(null)
-  const [searching,   setSearching]   = useState(false)
-  const [returnItems, setReturnItems] = useState([])
-  const [reason,      setReason]      = useState(REASONS[0])
-  const [saving,      setSaving]      = useState(false)
+  const [invoice,      setInvoice]      = useState('')
+  const [sale,         setSale]         = useState(null)
+  const [searching,    setSearching]    = useState(false)
+  const [returnItems,  setReturnItems]  = useState([])
+  const [reason,       setReason]       = useState(REASONS[0])
+  const [refundMethod, setRefundMethod] = useState('cash')
+  const [saving,       setSaving]       = useState(false)
 
   const searchSale = async () => {
     if (!invoice.trim()) return
@@ -34,11 +35,29 @@ const SaleReturnPage = () => {
       setSale(saleData)
 
       const saleItems = saleData?.items ?? saleData?.sale_items ?? []
-      setReturnItems(saleItems.map(i => ({
-        ...i,
-        return_qty: 0,
-        max_qty: Number(i.quantity),
-      })))
+
+      // Sale-level discount কে item গুলোতে proportionally ভাগ করি,
+      // যাতে customer যা আসলে দিয়েছিল সেই দামেই refund হয়
+      const saleSubtotal = Number(saleData?.subtotal ?? 0)
+      const saleDiscount = Number(saleData?.discount ?? 0)
+
+      setReturnItems(saleItems.map(i => {
+        const itemTotal        = Number(i.total ?? 0)
+        const itemShare        = saleSubtotal > 0 ? itemTotal / saleSubtotal : 0
+        const itemDiscountAmt  = saleDiscount * itemShare
+        const netTotal         = itemTotal - itemDiscountAmt
+        const qty               = Number(i.quantity) || 1
+        const netUnitPrice     = netTotal / qty
+
+        return {
+          ...i,
+          return_qty:     0,
+          max_qty:        qty,
+          gross_price:    Number(i.selling_price ?? 0),
+          net_unit_price: netUnitPrice,
+          cost_price:     Number(i.cost_price ?? 0),
+        }
+      }))
     } catch {
       toast.error('Sale খুঁজে পাওয়া যায়নি')
     } finally {
@@ -52,7 +71,7 @@ const SaleReturnPage = () => {
     ))
 
   const totalReturn = returnItems.reduce((s, i) =>
-    s + i.return_qty * Number(i.unit_price ?? i.sale_price ?? 0), 0)
+        s + i.return_qty * (i.net_unit_price ?? 0), 0)
 
   const onSubmit = async () => {
     const items = returnItems.filter(i => i.return_qty > 0)
@@ -61,14 +80,17 @@ const SaleReturnPage = () => {
     setSaving(true)
     try {
       await api.post('/sale-returns', {
-        sale_id: sale.id,
+        sale_id:        sale.id,
+        warehouse_id:   sale.warehouse_id,
+        refund_method:  refundMethod,
         reason,
         items: items.map(i => ({
-        sale_item_id: i.id,
-        product_id:   i.product_id,
-        quantity:     i.return_qty,
-        unit_price:   Number(i.selling_price ?? 0),
-      })),
+          sale_item_id:   i.id,
+          product_id:     i.product_id,
+          quantity:       i.return_qty,
+          selling_price:  Number(i.net_unit_price ?? 0),
+          cost_price:     Number(i.cost_price ?? 0),
+        })),
       })
       toast.success('Sale return সফল হয়েছে ✓')
       navigate('/sales')
@@ -125,8 +147,8 @@ const SaleReturnPage = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   ৳ {Number(sale.total_amount ?? 0).toLocaleString()}
                 </p>
-                <span className={`badge ${sale.status === 'paid' ? 'badge-success' : 'badge-warning'}`}>
-                  {sale.status}
+                <span className={`badge ${sale.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}`}>
+                  {sale.payment_status}
                 </span>
               </div>
             </div>
@@ -145,8 +167,11 @@ const SaleReturnPage = () => {
                       {item.product?.name ?? item.name}
                     </p>
                     <p className="text-xs text-gray-400">
-                                Sold: {item.max_qty} pcs · ৳{Number(item.selling_price ?? 0).toLocaleString()} each
-                              </p>
+                      Sold: {item.max_qty} pcs · ৳{item.net_unit_price.toLocaleString(undefined, { maximumFractionDigits: 2 })} each
+                      {item.gross_price > item.net_unit_price && (
+                        <span className="text-gray-300"> (gross ৳{item.gross_price.toLocaleString()}, ছাড় বাদে)</span>
+                      )}
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -164,10 +189,10 @@ const SaleReturnPage = () => {
                     </button>
                   </div>
 
-                  <div className="w-20 text-right flex-shrink-0">
+                 <div className="w-20 text-right flex-shrink-0">
                     <p className={`text-sm font-bold ${item.return_qty > 0 ? 'text-red-600' : 'text-gray-300'}`}>
                       {item.return_qty > 0
-                        ? `৳ ${(item.return_qty * Number(item.selling_price ?? 0)).toLocaleString()}`
+                        ? `৳ ${(item.return_qty * item.net_unit_price).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                         : '—'
                       }
                     </p>
@@ -178,11 +203,21 @@ const SaleReturnPage = () => {
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="xl:col-span-2 card card-body">
-              <label className="label">Return Reason</label>
-              <select value={reason} onChange={e => setReason(e.target.value)} className="input">
-                {REASONS.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
+            <div className="xl:col-span-2 card card-body grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Return Reason</label>
+                <select value={reason} onChange={e => setReason(e.target.value)} className="input">
+                  {REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label">Refund Method</label>
+                <select value={refundMethod} onChange={e => setRefundMethod(e.target.value)} className="input">
+                  <option value="cash">Cash (নগদ ফেরত)</option>
+                  <option value="store_credit">Store Credit</option>
+                  <option value="exchange">Exchange (পণ্য বদল)</option>
+                </select>
+              </div>
             </div>
             <div className="card card-body">
               <div className="space-y-2 text-sm mb-4">
@@ -194,7 +229,7 @@ const SaleReturnPage = () => {
                 </div>
                 <div className="flex justify-between font-bold text-base border-t pt-2">
                   <span>Refund Amount</span>
-                  <span className="text-red-600">৳ {totalReturn.toLocaleString()}</span>
+                  <span className="text-red-600">৳ {totalReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
               <button onClick={onSubmit} disabled={saving || totalReturn === 0}
